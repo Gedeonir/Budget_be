@@ -20,12 +20,16 @@ app.use("/", async(req,res)=>{
     })
 });
 
-const {authRoutes}=require("./routes/authRoutes")
+const {authRoutes}=require("./routes/authRoutes");
+const { institutionRoutes } = require("./routes/institutionRoutes");
+const { userRoutes } = require("./routes/usersRoutes");
 
 app.use(notFound);
 app.use(errorHandler);
 
 app.use("api/auth/",authRoutes);
+app.use("api/institutions",institutionRoutes);
+app.use("api/users/",userRoutes);
 
 dbConnect().then(()=>{
   console.log("Database connected sucessfully");

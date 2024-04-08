@@ -31,8 +31,10 @@ let userModel = new mongoose.Schema(
         type:String 
     },   
     profilePicture: {
-      type: Array,
-      default: [],
+      type: String,
+    },
+    institution:{
+        type: mongoose.Schema.Types.ObjectId, ref: "Institutions"
     },
     passwordChangedAt: Date,
     passwordResetToken: String,

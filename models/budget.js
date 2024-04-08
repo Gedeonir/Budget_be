@@ -24,7 +24,7 @@ let budgetModel=new mongoose.Schema({
         type:String,
         default:"Under review"
     },
-    reviwers:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"},message:{type:String},comment:{type:String}}],
+    reviewers:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"},message:{type:String},comment:{type:String}}],
     verifiedAndConfirmedBy:{
         type: mongoose.Schema.Types.ObjectId, ref: "Users"
     },
