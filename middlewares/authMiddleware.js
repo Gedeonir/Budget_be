@@ -1,6 +1,6 @@
 
-const Trainee = require("../models/traineeModel");
-const Admin =require("../models/adminModel");
+const Users = require("../models/users");
+const Institution =require("../models/institutions");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 
@@ -11,8 +11,15 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     try {
       if (token) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await Trainee.findById(decoded?.id);
-        req.user = user;
+        const user = await Users.findById(decoded?.id)
+        const institution=await Institution.findById(decoded?.id);
+        if(user){
+          req.user = user;
+          req.type=0
+        }else{
+          req.user = institution;
+          req.type=1
+        }
         next();
       }
     } catch (error) {
@@ -22,35 +29,15 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     throw new Error(" There is no token attached to header");
   }
 });
-
-const authMiddlewareAdmin = asyncHandler(async (req, res, next) => {
-  let token;
-  if (req?.headers?.authorization?.startsWith("Bearer")) {
-    token = req.headers.authorization.split(" ")[1].replace(/"/g, '');
-    try {
-      if (token) {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await Admin.findById(decoded?.id);
-        req.user = user;
-        next();
-      }
-    } catch (error) {
-      throw new Error("Not Authorized token expired, Please Login again");
-    }
-  } else {
-    throw new Error(" There is no token attached to header");
-  }
-});
-
 
 const isAdmin = asyncHandler(async (req, res, next) => {
   const { email } = req.user;
-  const adminUser = await Admin.findOne({ email });
+  const adminUser = await Users.findOne({ email });
   if (adminUser.role !== "admin") {
-    throw new Error("You are not an admin");
+    throw new Error("This task require administrator privileges");
   } else {
     next();
   }
 });
 
-module.exports = { authMiddleware,authMiddlewareAdmin, isAdmin };
+module.exports = { authMiddleware, isAdmin };

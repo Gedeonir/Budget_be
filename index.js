@@ -20,9 +20,12 @@ app.use("/", async(req,res)=>{
     })
 });
 
+const {authRoutes}=require("./routes/authRoutes")
 
 app.use(notFound);
 app.use(errorHandler);
+
+app.use("api/auth/",authRoutes);
 
 dbConnect().then(()=>{
   console.log("Database connected sucessfully");
