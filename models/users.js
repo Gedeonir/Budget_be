@@ -25,7 +25,7 @@ let userModel = new mongoose.Schema(
     },
     role: {
         type: String,
-        default:'admin'
+        default:'user'
     },
     position:{
         type:String 
@@ -34,7 +34,7 @@ let userModel = new mongoose.Schema(
       type: String,
     },
     institution:{
-        type: mongoose.Schema.Types.ObjectId, ref: "Institutions"
+      type: mongoose.Schema.Types.ObjectId, ref: "Institutions"
     },
     passwordChangedAt: Date,
     passwordResetToken: String,
@@ -61,7 +61,7 @@ userModel.methods.createPasswordResetToken = async function () {
     .random() * (99999 - 10000 + 1)) + 10000;
 
   this.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 10 minutes
-  return resettoken;
+  return this.passwordResetCode;
 };
 
 //Export the model

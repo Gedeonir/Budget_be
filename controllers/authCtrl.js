@@ -12,7 +12,6 @@ const login= asyncHandler(async(req,res)=>{
     if(!email || !password) throw new Error("All fields are required");
 
     const findUser=await Users.findOne({email});
-    const findInstitution=await Institutions.findOne({email});
 
     if (findUser && (await findUser.isPasswordMatched(password))) {
         res.json({
@@ -30,13 +29,15 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     try {  
         const user = await Users.findOne({ email });
-        const OTPCode = await Users.createPasswordResetToken();
+        if(!user) throw new Error("The email is not found")
+        const OTPCode = await user.createPasswordResetToken();
+        user.passwordResetToken = OTPCode;
         await user.save();
-       
+
         await sendEmail({
             email: user.email,
             subject: "Your password Reset OTP code (valid for 10 min )",
-            message:"Kode yo guhindura ijambo banga ryawe ni \n \n ${OTPCode}.\n Niba utasabye guhindura ijambo banga ryawe,irengangize iyi message.",
+            message:"Kode yo guhindura ijambo banga ryawe ni \n \n" + OTPCode +"\n Niba utasabye guhindura ijambo banga ryawe,irengangize iyi message.",
         });
     
         res.json({
@@ -49,13 +50,13 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
 const resetPassword = asyncHandler(async (req, res) => {
     const { password } = req.body;
-    const { OTPCode } = req.params;
-    const user = await Users.findOne({
-      passwordResetToken: OTPCode,
-      passwordResetExpires: { $gt: Date.now() },
-    });
+    const { OTPCode } = req.body;
+    try{
+        const user = await Users.findOne({
+            passwordResetToken: OTPCode,
+            passwordResetExpires: { $gt: Date.now() },
+        });
 
-    if (user){
         user.password = password;
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
@@ -63,7 +64,9 @@ const resetPassword = asyncHandler(async (req, res) => {
         res.json({
           message:"Password changed succesfully"
         });
-    }else throw new Error(" OTP Code Expired or is invalid, Request another one");
+    }catch(error){
+        throw new Error(" OTP Code Expired or is invalid",error)
+    } 
   });
   
   

@@ -4,13 +4,13 @@ const validateMongodbId = require("../utils/validateMongodbId");
 const sendEmail=require("../utils/sendEmail");
 
 const addInstitution=asyncHandler(async(req,res)=>{
-    const {institutionName,email,mobile,password,size}=req.body;
+    const {institutionName,email,mobile,size}=req.body;
 
-    if(!institutionName ||!email ||!mobile||!password||!size)throw new Error("All fields are required")
+    if(!institutionName ||!email ||!mobile||!size)throw new Error("All fields are required")
 
     const findInstitution=await Institution.findOne({institutionName});
 
-    if(!findInstitution) throw new  Error("Instution already exists");
+    if(findInstitution) throw new  Error("Instution already exists");
 
     try {
         const newInstitution= await Institution.create({
@@ -33,7 +33,7 @@ const getOneInstitution=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
     try{
-        const oneInstitution=await Institution.findById(_id);
+        const oneInstitution=await Institution.findById(id);
         res.json({
             oneInstitution
         })
@@ -45,7 +45,7 @@ const getOneInstitution=asyncHandler(async(req,res)=>{
 const getAllInstitutions = asyncHandler(async (req, res) => {
     try {
       const getInstitutions = await Institution.find({});
-      res.json(getInstitutions);
+      res.json({getInstitutions});
     } catch (error) {
       throw new Error(error);
     }
@@ -71,9 +71,9 @@ const updateInstitution=asyncHandler(async(req,res)=>{
     
     const{institutionName,email,mobile,password,size}=req.body
 
-    if(!institutionName ||!email ||!mobile||!password||!size) throw new Error("All fields are required");
+    if(!institutionName ||!email ||!mobile||!size) throw new Error("All fields are required");
 
-    if(await Institution.findOne({email})) throw new Error("Institution already exists")
+    if(!await Institution.findById(id)) throw new Error("Institution not found")
 
     try {
         const updateInstitution = await Institution.findByIdAndUpdate(
@@ -89,7 +89,7 @@ const updateInstitution=asyncHandler(async(req,res)=>{
             }
         )
 
-        res.json(updateInstitution)
+        res.json({message:"Institution updated succesfully"})
     } catch (error) {
      throw new Error(error)   
     }

@@ -19,17 +19,18 @@ const viewProfile=asyncHandler(async(req,res)=>{
 })
 
 const newUser=asyncHandler(async(req,res)=>{
-    const {institution}=req.params;
+    const {id}=req.params;
+    validateMongodbId(id)
     const{fullNames,email,mobile,password,position,role}=req.body;
 
-    if(!fullNames || !email||!mobile||!password||!position||!role) throw new Error("All fields are required");
+    if(!fullNames || !email||!mobile||!password||!position) throw new Error("All fields are required");
 
-    const getInstitution=await Institution.findById(institution);
+    const getInstitution=await Institution.findById(id);
 
     if (!getInstitution) {
         throw new Error("No such instution found");
     }
-    if(Users.findOne({email})) throw new Error("User already exists");
+    if(await Users.findOne({email})) throw new Error("User already exists");
 
     try {
         const newUser=await Users.create({
@@ -54,10 +55,10 @@ const getOneUser=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
     try{
-        const oneUser=await Users.findById(_id);
+        const oneUser=await Users.findById(id).populate("institution");
         res.json({
             oneUser
-        })
+        });
     }catch(error){
         throw new Error(error)
     }
@@ -65,8 +66,8 @@ const getOneUser=asyncHandler(async(req,res)=>{
 
 const getAllUsers = asyncHandler(async (req, res) => {
     try {
-      const getUsers = await Users.find({});
-      res.json(getUsers);
+      const getUsers = await Users.find({},{password:0,passwordResetToken:0,passwordResetExpires:0}).populate("institution");
+      res.json({getUsers})
     } catch (error) {
       throw new Error(error);
     }
@@ -89,18 +90,27 @@ const deleteUser=asyncHandler(async(req,res)=>{
 const updateUser=asyncHandler(async(req,res)=>{
     const{fullNames,email,mobile,password,position,role}=req.body;
 
-    if(!fullNames || !email||!mobile||!password||!position||!role) throw new Error("All fields are required");
+    const {id}=req.params;
+    validateMongodbId(id)
+
+    if(!fullNames || !email||!mobile||!position) throw new Error("All fields are required");
     try {
-        const updateUser=await Users.findByIdAndUpdate({
+        const updateUser=await Users.findByIdAndUpdate(id,{
             fullNames,
             email,
             mobile,
             password,
             position,
             role
-        })
+        },
+        {
+            new: true,
+        }
+        )
 
-        res.json({updateUser});
+        res.json({
+            message:"User updated succesfully",
+        });
     } catch (error) {
         throw new Error(error);
     }

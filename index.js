@@ -14,22 +14,22 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/", async(req,res)=>{
+app.use("/api/welcome", async(req,res)=>{
     return res.json({
         message:"Welcome to budget planning and execution website"
     })
 });
 
-const {authRoutes}=require("./routes/authRoutes");
-const { institutionRoutes } = require("./routes/institutionRoutes");
-const { userRoutes } = require("./routes/usersRoutes");
+const authRoutes=require("./routes/authRoutes");
+const institutionRoutes  = require("./routes/institutionRoutes");
+const userRoutes  = require("./routes/usersRoutes");
+
+app.use("/api/auth",authRoutes);
+app.use("/api/institutions",institutionRoutes);
+app.use("/api/users",userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
-
-app.use("api/auth/",authRoutes);
-app.use("api/institutions",institutionRoutes);
-app.use("api/users/",userRoutes);
 
 dbConnect().then(()=>{
   console.log("Database connected sucessfully");

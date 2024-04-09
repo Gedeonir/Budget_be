@@ -16,6 +16,6 @@ institutionRoutes.post("/new",authMiddleware,isAdmin,addInstitution);
 institutionRoutes.get("/one/:id",authMiddleware,getOneInstitution);
 institutionRoutes.get("/",authMiddleware,getAllInstitutions);
 institutionRoutes.delete("/:id",authMiddleware,isAdmin,deleteInstitution);
-institutionRoutes.patch("/:id",authMiddleware,isAdmin,deleteInstitution);
+institutionRoutes.patch("/:id",authMiddleware,isAdmin,updateInstitution);
 
-module.exports={institutionRoutes};
+module.exports=institutionRoutes;

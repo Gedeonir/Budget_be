@@ -15,4 +15,4 @@ authRoutes.patch("/forgotpassword",forgotPassword);
 authRoutes.patch("/resetpassword",resetPassword);
 authRoutes.patch("/changepassword",authMiddleware,changePassword);
 
-module.exports = {authRoutes};
+module.exports = authRoutes;
