@@ -5,11 +5,11 @@ const validateMongodbId = require("../utils/validateMongodbId");
 const Institution=require("../models/institutions");
 
 const viewProfile=asyncHandler(async(req,res)=>{
-    const {_id}=req.user;
-    validateMongodbId(_id);
+    const {id}=req.user;
+    validateMongodbId(id);
     try{
         
-        const getProfile= await Users.findById(_id,{password:0,passwordResetToken:0,passwordResetExpires:0});
+        const getProfile= await Users.findById(id,{password:0,passwordResetToken:0,passwordResetExpires:0});
         res.json({
             getProfile,
           });
@@ -17,6 +17,8 @@ const viewProfile=asyncHandler(async(req,res)=>{
         throw new Error(error);
     }
 })
+
+
 
 const newUser=asyncHandler(async(req,res)=>{
     const {id}=req.params;
@@ -123,6 +125,6 @@ module.exports={
     getAllUsers,
     getOneUser,
     deleteUser,
-    updateUser
+    updateUser,
 }
 

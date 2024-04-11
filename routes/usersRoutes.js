@@ -4,7 +4,7 @@ const{
     getAllUsers,
     getOneUser,
     deleteUser,
-    updateUser
+    updateUser,
 }=require("../controllers/usersCtrl");
 
 const express=require("express");
@@ -17,8 +17,7 @@ userRoutes.post("/new/:id",authMiddleware,isAdmin,newUser);
 userRoutes.get("/:id",authMiddleware,getOneUser);
 userRoutes.get("/",authMiddleware,getAllUsers);
 userRoutes.delete("/:id",authMiddleware,isAdmin,deleteUser);
-userRoutes.get("/about",authMiddleware,viewProfile);
+userRoutes.get("/one/about",authMiddleware,viewProfile);
 userRoutes.put("/:id",authMiddleware,isAdmin,updateUser);
-
 
 module.exports=userRoutes
