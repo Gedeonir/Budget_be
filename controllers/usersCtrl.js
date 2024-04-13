@@ -9,7 +9,7 @@ const viewProfile=asyncHandler(async(req,res)=>{
     validateMongodbId(id);
     try{
         
-        const getProfile= await Users.findById(id,{password:0,passwordResetToken:0,passwordResetExpires:0});
+        const getProfile= await Users.findById(id,{password:0,passwordResetToken:0,passwordResetExpires:0}).populate("institution");
         res.json({
             getProfile,
           });

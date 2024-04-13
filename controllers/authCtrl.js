@@ -51,6 +51,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
     const { password } = req.body;
     const { OTPCode } = req.body;
+
+    if(!password ||!OTPCode) throw new Error("All fields are required")
     try{
         const user = await Users.findOne({
             passwordResetToken: OTPCode,
