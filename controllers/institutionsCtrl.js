@@ -4,9 +4,9 @@ const validateMongodbId = require("../utils/validateMongodbId");
 const sendEmail=require("../utils/sendEmail");
 
 const addInstitution=asyncHandler(async(req,res)=>{
-    const {institutionName,email,mobile,size}=req.body;
+    const {institutionName,email,mobile,acorynm}=req.body;
 
-    if(!institutionName ||!email ||!mobile||!size)throw new Error("All fields are required")
+    if(!institutionName ||!email ||!mobile||!acorynm)throw new Error("All fields are required")
 
     const findInstitution=await Institution.findOne({institutionName});
 
@@ -15,9 +15,9 @@ const addInstitution=asyncHandler(async(req,res)=>{
     try {
         const newInstitution= await Institution.create({
             institutionName,
+            acorynm,
             email,
             mobile,
-            size
         });
 
         res.json({
@@ -44,7 +44,7 @@ const getOneInstitution=asyncHandler(async(req,res)=>{
 
 const getAllInstitutions = asyncHandler(async (req, res) => {
     try {
-      const getInstitutions = await Institution.find({});
+      const getInstitutions = await Institution.find({}).sort({createdAt:-1});
       res.json({getInstitutions});
     } catch (error) {
       throw new Error(error);
@@ -53,7 +53,9 @@ const getAllInstitutions = asyncHandler(async (req, res) => {
 
 const deleteInstitution=asyncHandler(async(req,res)=>{
     const {id}=req.params;
+    console.log(req.params);
     validateMongodbId(id);
+
 
     try {
         await Institution.findByIdAndDelete(id)

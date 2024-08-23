@@ -23,10 +23,12 @@ app.use("/api/welcome", async(req,res)=>{
 const authRoutes=require("./routes/authRoutes");
 const institutionRoutes  = require("./routes/institutionRoutes");
 const userRoutes  = require("./routes/usersRoutes");
+const budgetRouter = require("./routes/budgetRoutes")
 
 app.use("/api/auth",authRoutes);
 app.use("/api/institutions",institutionRoutes);
 app.use("/api/users",userRoutes);
+app.use("/api/budget",budgetRouter);
 
 app.use(notFound);
 app.use(errorHandler);

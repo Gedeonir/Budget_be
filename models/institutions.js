@@ -6,18 +6,19 @@ let institutionsModel=new mongoose.Schema({
         type:String,
         required:true
     },
+    acorynm:{
+        type:String,
+        required:true
+    },
     email:{
         type:String,
         required:true,
-        unique:true
+        // unique:true
     },
     mobile:{
         type:String,
         required:true,
-        unique:true
-    },
-    size:{
-        type:String
+        // unique:true
     },
     profilePicture: {
         type: Array,
