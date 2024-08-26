@@ -21,13 +21,16 @@ const viewProfile=asyncHandler(async(req,res)=>{
 
 
 const newUser=asyncHandler(async(req,res)=>{
-    const {id}=req.params;
-    validateMongodbId(id)
-    const{fullNames,email,mobile,password,position,role}=req.body;
+    const{title,fullNames,email,mobile,password,position,institution}=req.body;
 
-    if(!fullNames || !email||!mobile||!password||!position) throw new Error("All fields are required");
+    console.log(institution);
+    
 
-    const getInstitution=await Institution.findById(id);
+    if(!fullNames || !email||!mobile||!password||!position ||!institution) throw new Error("All fields are required");
+
+    validateMongodbId(institution)
+
+    const getInstitution=await Institution.findById(institution);
 
     if (!getInstitution) {
         throw new Error("No such instution found");
@@ -36,11 +39,11 @@ const newUser=asyncHandler(async(req,res)=>{
 
     try {
         const newUser=await Users.create({
+            title,
             fullNames,
             email,
             mobile,
             password,
-            role,
             position,
             institution:getInstitution._id
         })

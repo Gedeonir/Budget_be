@@ -13,7 +13,7 @@ const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
 const userRoutes=express.Router();
 
-userRoutes.post("/new/:id",authMiddleware,isAdmin,newUser);
+userRoutes.post("/new/",authMiddleware,isAdmin,newUser);
 userRoutes.get("/:id",authMiddleware,getOneUser);
 userRoutes.get("/",authMiddleware,getAllUsers);
 userRoutes.delete("/:id",authMiddleware,isAdmin,deleteUser);

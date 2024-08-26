@@ -5,6 +5,10 @@ const crypto = require("crypto");
 
 let userModel = new mongoose.Schema(
   {
+    title: {
+      type: String,
+      default:"Mr"
+    },
     fullNames: {
       type: String,
       required: true,
@@ -24,11 +28,11 @@ let userModel = new mongoose.Schema(
       required: true,
     },
     role: {
-        type: String,
-        default:'user'
+      type: String,
+      default:'user'
     },
     position:{
-        type:String 
+      type:String 
     },   
     profilePicture: {
       type: String,

@@ -4,9 +4,9 @@ const validateMongodbId = require("../utils/validateMongodbId");
 const sendEmail=require("../utils/sendEmail");
 
 const addInstitution=asyncHandler(async(req,res)=>{
-    const {institutionName,email,mobile,acorynm}=req.body;
+    const {institutionName,email,mobile,acronym}=req.body;
 
-    if(!institutionName ||!email ||!mobile||!acorynm)throw new Error("All fields are required")
+    if(!institutionName ||!email ||!mobile||!acronym)throw new Error("All fields are required")
 
     const findInstitution=await Institution.findOne({institutionName});
 
@@ -15,7 +15,7 @@ const addInstitution=asyncHandler(async(req,res)=>{
     try {
         const newInstitution= await Institution.create({
             institutionName,
-            acorynm,
+            acronym,
             email,
             mobile,
         });
@@ -71,9 +71,9 @@ const updateInstitution=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
     
-    const{institutionName,email,mobile,password,size}=req.body
+    const {institutionName,email,mobile,acronym}=req.body;
 
-    if(!institutionName ||!email ||!mobile||!size) throw new Error("All fields are required");
+    if(!institutionName ||!email ||!mobile||!acronym)throw new Error("All fields are required")
 
     if(!await Institution.findById(id)) throw new Error("Institution not found")
 
@@ -82,9 +82,9 @@ const updateInstitution=asyncHandler(async(req,res)=>{
             id,
             {
                 institutionName,
+                acronym,
                 email,
                 mobile,
-                size
             },
             {
                 new: true,

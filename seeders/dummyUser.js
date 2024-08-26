@@ -9,32 +9,23 @@ const institutions = require("../models/institutions");
 const seedUser=async()=>{
     const salt = await bcrypt.genSaltSync(10);
 
-    const institution = [];
 
-    for (let i = 1; i <= 100; i++) {
-        institution.push({
-            institutionName: "Ministry of Finance and Economic Planning",
-            email: `info${i}@minecofin.gov.rw`,
-            mobile: `0100${i.toString().padStart(4, '0')}`,
-            acronym: "MINECOFIN"
-        });
+    const institution={
+        "institutionName":"Ministry of Finance and Economic Planning",
+        "email":"info@minecofin.gov.rw",
+        "mobile":"0100",
+        "acronym":"MINECOFIN"
     }
-
-    // const institution={
-    //     "institutionName":"Ministry of Finance and Economic Planning",
-    //     "email":"info@minecofin.gov.rw",
-    //     "mobile":"0100",
-    //     "acronym":"MINECOFIN"
-    // }
 
     try {
         const email=process.env.USER_EMAIL
         
         await Users.deleteOne({email});
-        await institutions.deleteOne({institutionName:institution.institutionName})
+        await institutions.deleteMany({})
         const createInstitution= await institutions.insertMany(institution);
 
         const adminUser=[{
+            "Title":"Mr",
             fullNames: "Administartor",
             email: process.env.USER_EMAIL,
             mobile:"070000000",

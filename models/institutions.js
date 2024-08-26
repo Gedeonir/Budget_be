@@ -6,7 +6,7 @@ let institutionsModel=new mongoose.Schema({
         type:String,
         required:true
     },
-    acorynm:{
+    acronym:{
         type:String,
         required:true
     },
