@@ -15,7 +15,7 @@ let budgetModel=new mongoose.Schema({
             percentage:{type:String},
         },
     ],
-    FYI:[{type:String}],
+    fyi:{type:String},
     status:{
         type:String,
         default:"Under review"

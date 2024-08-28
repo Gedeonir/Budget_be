@@ -35,9 +35,8 @@ const getAllBudgets=asyncHandler(async (req,res)=>{
         const allBudgets=await Budget.find({})
         .populate("institution")
         .populate({path:"reviewers",populate:"user"})
-        .populate({path:"contributors",populate:"user"})
+        .populate({path:"Contributors",populate:"user"})
         .populate({path:"verifiedAndConfirmedBy",populate:"user"})
-        .populate({path:"budgetTimeline", populate:"user"});
 
         res.json(allBudgets)
     } catch (error) {
@@ -54,7 +53,6 @@ const getOneBudget=asyncHandler(async(req,res)=>{
         .populate({path:"reviewers",populate:"user"})
         .populate({path:"contributors",populate:"user"})
         .populate({path:"verifiedAndConfirmedBy",populate:"user"})
-        .populate({path:"budgetTimeline", populate:"user"});
 
         res.json(oneBudget);
     } catch (error) {    

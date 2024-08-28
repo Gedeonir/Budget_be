@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 const { generateToken } = require("../utils/jwtToken");
 const validateMongodbId = require("../utils/validateMongodbId");
 const Institution=require("../models/institutions");
+const sendEmail=require("../utils/sendEmail");
 
 const viewProfile=asyncHandler(async(req,res)=>{
     const {id}=req.user;
@@ -47,6 +48,12 @@ const newUser=asyncHandler(async(req,res)=>{
             position,
             institution:getInstitution._id
         })
+
+        await sendEmail({
+            email: newUser.email,
+            subject: "Your password",
+            message:"Ijambo banga ryawe ni \n \n" + password,
+        });
 
         res.json({newUser});
     } catch (error) {
