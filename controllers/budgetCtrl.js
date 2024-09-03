@@ -2,10 +2,10 @@ const Budget=require('../models/budget');
 const asyncHandler=require('express-async-handler');
 const validateMongodbId = require("../utils/validateMongodbId");
 const sendEmail=require("../utils/sendEmail");
-
+const Request=require('../models/budgetRequests');
 
 const addBudget=asyncHandler(async(req,res)=>{
-    const {fyi,amount,expenses,institution,reviewers,contributors,description}=req.body;
+    const {fyi,amount,expenses,institution,user,contributors,description}=req.body;
 
     if (!fyi || !amount || !institution || !description) throw new Error("All fields are required");
     
@@ -21,6 +21,7 @@ const addBudget=asyncHandler(async(req,res)=>{
             amount:amount,
             institution:institution,
             description:description,
+            createdBy:user
         });
         res.json(newBudget);
         
@@ -34,8 +35,7 @@ const getAllBudgets=asyncHandler(async (req,res)=>{
     try {
         const allBudgets=await Budget.find({})
         .populate("institution")
-        .populate({path:"reviewers",populate:"user"})
-        .populate({path:"Contributors",populate:"user"})
+        .populate({path:"contributors",populate:"user"})
         .populate({path:"verifiedAndConfirmedBy",populate:"user"})
 
         res.json(allBudgets)
@@ -50,7 +50,6 @@ const getOneBudget=asyncHandler(async(req,res)=>{
     try{
         const oneBudget=await Budget.findById(id)
         .populate("institution")
-        .populate({path:"reviewers",populate:"user"})
         .populate({path:"contributors",populate:"user"})
         .populate({path:"verifiedAndConfirmedBy",populate:"user"})
 
@@ -146,6 +145,56 @@ const removeReviewers=asyncHandler(async(req,res)=>{
     }
 })
 
+const createRequest=asyncHandler(async(req,res)=>{
+    const {budget,description}=req.body;
+    try {
+        const newRequest=await Request.create({
+            budget,
+            description
+        });
+
+        if (newRequest) {
+            const updatebudget = await Budget.findByIdAndUpdate(budget, {
+                status: "pending",
+            });
+        }
+        res.json(newRequest);
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
+const getAllRequests=asyncHandler(async(req,res)=>{
+    try {
+        const allRequests=await Request.find({})
+        .populate("budget")
+        .populate({path:"reviewers",populate:"user"})
+        .populate({path:"budget",populate:"institution"})
+
+
+        res.json(allRequests)
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+
+const getOneRequest=asyncHandler(async(req,res)=>{
+    const {id}=req.params;
+    validateMongodbId(id);
+    try {
+        const request=await Request.findById(id)
+        .populate("budget")
+        .populate({path:"reviewers",populate:"user"})
+        .populate({path:"budget",populate:"institution"})
+
+
+        res.json(request);
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
+
 module.exports={
     addBudget,
     getAllBudgets,
@@ -154,5 +203,8 @@ module.exports={
     addContributors,
     addReviewers,
     removeContributors,
-    removeReviewers
+    removeReviewers,
+    createRequest,
+    getAllRequests,
+    getOneRequest
 }

@@ -1,4 +1,4 @@
-const Users=require("../models/users");
+const Users = require("../models/users");
 const asyncHandler = require("express-async-handler");
 const { generateToken } = require("../utils/jwtToken");
 const Institutions=require("../models/institutions");

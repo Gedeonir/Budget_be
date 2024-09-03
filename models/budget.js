@@ -18,10 +18,9 @@ let budgetModel=new mongoose.Schema({
     fyi:{type:String},
     status:{
         type:String,
-        default:"Under review"
+        default:"pending"
     },
-    reviewers:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"},message:{type:String},comment:{type:String}}],
-    Contributors:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"},message:{type:String},comment:{type:String}}],
+    contributors:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"}}],
     verifiedAndConfirmedBy:{
         type: mongoose.Schema.Types.ObjectId, ref: "Users"
     },
@@ -34,6 +33,7 @@ let budgetModel=new mongoose.Schema({
     description:{
         type:String
     },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
   
 },
 {
