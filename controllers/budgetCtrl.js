@@ -152,7 +152,8 @@ const createRequest=asyncHandler(async(req,res)=>{
     try {
         const newRequest=await Request.create({
             budget,
-            description
+            description,
+            requestedBy:req?.user?._id
         });
 
         if (newRequest) {
@@ -172,6 +173,8 @@ const getAllRequests=asyncHandler(async(req,res)=>{
         .populate("budget")
         .populate({path:"reviewers",populate:"user"})
         .populate({path:"budget",populate:"institution"})
+        .populate("requestedBy")
+
 
 
         res.json(allRequests)
@@ -188,9 +191,39 @@ const getOneRequest=asyncHandler(async(req,res)=>{
         .populate("budget")
         .populate({path:"reviewers",populate:"user"})
         .populate({path:"budget",populate:"institution"})
+        .populate("requestedBy")
+        .populate({path:"comment",populate:[
+            { path: "user" },
+            { path: "requested" }
+        ]})
+
 
 
         res.json(request);
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
+const sendReview=asyncHandler(async(req,res)=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+})
+
+const addComents=asyncHandler(async(req,res)=>{
+    const {id}=req.params;
+    validateMongodbId(id);
+    const {comment}=req.body;
+    try {
+        const updateRequest=await Request.findByIdAndUpdate(id,{
+            $push:{comment}
+        },{
+            new:true
+        });
+        res.json(updateRequest);
     } catch (error) {
         throw new Error(error);
     }
@@ -208,5 +241,6 @@ module.exports={
     removeReviewers,
     createRequest,
     getAllRequests,
-    getOneRequest
+    getOneRequest,
+    addComents
 }
