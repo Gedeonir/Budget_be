@@ -25,7 +25,7 @@ budgetRoutes.patch("/:id",authMiddleware,updateBudget);
 budgetRoutes.patch("/addContributors/:id",authMiddleware,addContributors);
 budgetRoutes.patch("/addReviewers/:id",authMiddleware,addReviewers);
 budgetRoutes.patch("/removeContributors/:id",authMiddleware,removeContributors);
-budgetRoutes.patch("/removeReviewers/:id",authMiddleware,removeReviewers);
+budgetRoutes.patch("/removeReviewers/:id",removeReviewers);
 budgetRoutes.post("/request/createRequest",authMiddleware,createRequest);
 budgetRoutes.get("/request/all",authMiddleware,getAllRequests);
 budgetRoutes.get("/request/:id",authMiddleware,getOneRequest);

@@ -101,8 +101,9 @@ const addReviewers=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
     const {reviewers}=req.body;
+    
     try {
-        const updateBudget=await Budget.findByIdAndUpdate(id,{
+        const updateBudget=await Request.findByIdAndUpdate(id,{
             $push:{reviewers}
         },{
             new:true
@@ -133,8 +134,9 @@ const removeReviewers=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
     const {reviewers}=req.body;
+    
     try {
-        const updateBudget=await Budget.findByIdAndUpdate(id,{
+        const updateBudget=await Request.findByIdAndUpdate(id,{
             $pull:{reviewers}
         },{
             new:true
