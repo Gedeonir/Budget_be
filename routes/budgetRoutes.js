@@ -10,7 +10,8 @@ const {
     createRequest,
     getAllRequests,
     getOneRequest,
-    addComents
+    addComents,
+    sendReview
 }=require("../controllers/budgetCtrl");
 
 const express=require("express");
@@ -31,5 +32,6 @@ budgetRoutes.post("/request/createRequest",authMiddleware,createRequest);
 budgetRoutes.get("/request/all",authMiddleware,getAllRequests);
 budgetRoutes.get("/request/:id",authMiddleware,getOneRequest);
 budgetRoutes.patch("/request/comment/:id",authMiddleware,addComents);
+budgetRoutes.patch("/request/:requestId/review",authMiddleware,sendReview);
 
 module.exports= budgetRoutes;

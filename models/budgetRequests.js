@@ -7,7 +7,7 @@ const budgetRequest=new mongoose.Schema({
     reviewers:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"},reviewerStatus:{type:String,default:"pending"}}],
     status:{
         type:String,
-        default:"pending"
+        default:"open"
     },
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
     comment:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"},message:{type:String},createdAt:{type:Date,default:Date.now()}, category:{type:String},requested:{type: mongoose.Schema.Types.ObjectId, ref: "Users"}}],

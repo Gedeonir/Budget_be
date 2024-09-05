@@ -206,9 +206,21 @@ const getOneRequest=asyncHandler(async(req,res)=>{
 })
 
 const sendReview=asyncHandler(async(req,res)=>{
+    const {requestId}=req.params;
+    const {id}=req.user;
+    const { reviewerStatus} = req.body;    
+
     try {
+        const request = await Request.findOneAndUpdate(
+            { _id: requestId, "reviewers.user": id },
+            { $set: { "reviewers.$.reviewerStatus": reviewerStatus } },
+            { new: true }
+        ).populate('reviewers.user');      
+
+        res.json(request);
         
     } catch (error) {
+        throw new Error(error);
         
     }
 })
@@ -242,5 +254,6 @@ module.exports={
     createRequest,
     getAllRequests,
     getOneRequest,
-    addComents
+    addComents,
+    sendReview
 }
