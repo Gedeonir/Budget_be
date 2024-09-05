@@ -1,5 +1,4 @@
 const { default: mongoose } = require("mongoose");
-const reviewers = require("./reviewers");
 
 const budgetRequest=new mongoose.Schema({
     budget: { type: mongoose.Schema.Types.ObjectId, ref: 'Budgets' },
