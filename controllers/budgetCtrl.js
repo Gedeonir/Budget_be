@@ -156,11 +156,6 @@ const createRequest=asyncHandler(async(req,res)=>{
             requestedBy:req?.user?._id
         });
 
-        if (newRequest) {
-            const updatebudget = await Budget.findByIdAndUpdate(budget, {
-                status: "pending",
-            });
-        }
         res.json(newRequest);
     } catch (error) {
         throw new Error(error);
@@ -173,7 +168,7 @@ const getAllRequests=asyncHandler(async(req,res)=>{
         .populate("budget")
         .populate({path:"reviewers",populate:"user"})
         .populate({path:"budget",populate:"institution"})
-        .populate("requestedBy")
+        .populate("requestedBy").sort({createdAt:-1})
 
 
 
@@ -241,6 +236,37 @@ const addComents=asyncHandler(async(req,res)=>{
     }
 })
 
+const modifyRequest=asyncHandler(async(req,res)=>{
+    const {requestId}=req.params;
+    validateMongodbId(requestId);
+    const {status}=req.body;
+    try {
+        const updateRequest=await Request.findByIdAndUpdate(requestId,{
+            status
+        },{
+            new:true
+        });
+        res.json(updateRequest);
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
+const approveBudget=asyncHandler(async(req,res)=>{
+    const {id}=req.params;
+    validateMongodbId(id);
+    const {status}=req.body;
+    try {
+        const updateBudget=await Budget.findByIdAndUpdate(id,{
+            status
+        },{
+            new:true
+        });
+        res.json(updateBudget);
+    } catch (error) {
+        throw new Error(error);
+    }
+})
 
 module.exports={
     addBudget,
@@ -255,5 +281,7 @@ module.exports={
     getAllRequests,
     getOneRequest,
     addComents,
-    sendReview
+    sendReview,
+    modifyRequest,
+    approveBudget
 }

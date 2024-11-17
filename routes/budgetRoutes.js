@@ -11,12 +11,15 @@ const {
     getAllRequests,
     getOneRequest,
     addComents,
-    sendReview
+    sendReview,
+    modifyRequest,
+    approveBudget
 }=require("../controllers/budgetCtrl");
 
 const express=require("express");
 
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
+const { getAllTransactions } = require("../controllers/transactionsCtrl");
 
 const budgetRoutes=express.Router();
 
@@ -33,5 +36,10 @@ budgetRoutes.get("/request/all",authMiddleware,getAllRequests);
 budgetRoutes.get("/request/:id",authMiddleware,getOneRequest);
 budgetRoutes.patch("/request/comment/:id",authMiddleware,addComents);
 budgetRoutes.patch("/request/:requestId/review",authMiddleware,sendReview);
+budgetRoutes.patch("/request/:requestId/modify",authMiddleware,modifyRequest);
+budgetRoutes.patch("/:id/approve",authMiddleware,isAdmin,approveBudget);
+
+
+budgetRoutes.get("/transactions/all",authMiddleware,getAllTransactions);
 
 module.exports= budgetRoutes;

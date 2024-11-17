@@ -23,7 +23,10 @@ let transactionsModel=new mongoose.Schema({
     Slips:{
         type:String,
         required:true
-    }
+    },
+    recordedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
+    category:{type:String, required:true},
+
 },{timestamps:true});
 
 module.exports = mongoose.model("Transactions", transactionsModel);
