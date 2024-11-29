@@ -9,6 +9,9 @@ const PORT = process.env.PORT || 5000;
 const morgan = require("morgan");
 const cors = require("cors");
 
+const socket = require('./utils/socket')
+
+
 app.use(morgan("dev"));
 app.use(cors());
 app.use(bodyParser.json());
@@ -35,8 +38,10 @@ app.use(errorHandler);
 
 dbConnect().then(()=>{
   console.log("Database connected sucessfully");
-  app.listen(PORT, () => {
+  const server=app.listen(PORT, () => {
+    app.emit("Started");
     console.log(`Server is running  at PORT ${PORT}`);
   })
-}
-);
+  socket.socketMethod.socketStarter(server)
+});
+
