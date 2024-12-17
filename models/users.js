@@ -1,6 +1,7 @@
 const mongoose = require("mongoose"); // Erase if already required
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const { type } = require("os");
 // Declare the Schema of the Mongo model
 
 let userModel = new mongoose.Schema(
@@ -40,6 +41,7 @@ let userModel = new mongoose.Schema(
     institution:{
       type: mongoose.Schema.Types.ObjectId, ref: "Institutions"
     },
+    passwordChanged:{type:Boolean,default:false},
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,

@@ -76,12 +76,11 @@ const resetPassword = asyncHandler(async (req, res) => {
     const {_id} = req.user;
     validateMongodbId(_id);
     
-    try {
-        const user= await Users.findOne({_id});
-            
+    const user= await Users.findOne({_id});
+    if(user){
         //4.get password from reques body
         const { oldpassword, newpassword1, newpassword2 } = req.body;
-    
+
         //5. Check passwords
         const password = await bcrypt.compare(oldpassword, user.password);
         if (!password) {
@@ -90,16 +89,17 @@ const resetPassword = asyncHandler(async (req, res) => {
         if (newpassword1 !== newpassword2) {
             throw new Error("new password does not match" );
         }
-    
+
         //6.hash password
-    
+
         //update pass
         user.password = newpassword1;
+        user.passwordChanged=true;
         await user.save();
-    
+
         res.json({ message: "your password is updated successfully" });
-    } catch (error) {
-        throw new Error("Unable to change password",error );
+    }else{
+        throw new Error("Changing password fail");
     }
   
 });

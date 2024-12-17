@@ -19,7 +19,7 @@ const {
 const express=require("express");
 
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
-const { getAllTransactions } = require("../controllers/transactionsCtrl");
+const { getAllTransactions, addTransaction } = require("../controllers/transactionsCtrl");
 
 const budgetRoutes=express.Router();
 
@@ -39,7 +39,7 @@ budgetRoutes.patch("/request/:requestId/review",authMiddleware,sendReview);
 budgetRoutes.patch("/request/:requestId/modify",authMiddleware,modifyRequest);
 budgetRoutes.patch("/:id/approve",authMiddleware,isAdmin,approveBudget);
 
-
 budgetRoutes.get("/transactions/all",authMiddleware,getAllTransactions);
+budgetRoutes.post("/transaction/new",authMiddleware,addTransaction);
 
 module.exports= budgetRoutes;
