@@ -31,7 +31,7 @@ const seedUser=async()=>{
             mobile:"070000000",
             password:await bcrypt.hash(process.env.USER_PASSWORD, salt),
             role:'admin',
-            position:"Administrator",
+            position:"BMO",
             institution:createInstitution[0]._id,
             passwordResetToken: undefined,
             passwordResetExpires: undefined,

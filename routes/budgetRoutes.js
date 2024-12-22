@@ -13,7 +13,9 @@ const {
     addComents,
     sendReview,
     modifyRequest,
-    approveBudget
+    approveBudget,
+    getAllCategories,
+    addExenpenseOrIncome
 }=require("../controllers/budgetCtrl");
 
 const express=require("express");
@@ -41,5 +43,8 @@ budgetRoutes.patch("/:id/approve",authMiddleware,isAdmin,approveBudget);
 
 budgetRoutes.get("/transactions/all",authMiddleware,getAllTransactions);
 budgetRoutes.post("/transaction/new",authMiddleware,addTransaction);
+
+budgetRoutes.post("/categories/new/:id",authMiddleware,addExenpenseOrIncome);
+budgetRoutes.get("/categories/all",authMiddleware,getAllCategories);
 
 module.exports= budgetRoutes;

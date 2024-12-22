@@ -3,9 +3,11 @@ const asyncHandler=require('express-async-handler');
 const validateMongodbId = require("../utils/validateMongodbId");
 const sendEmail=require("../utils/sendEmail");
 const Request=require('../models/budgetRequests');
+const Users=require('../models/users');
+const categories = require('../models/categories');
 
 const addBudget=asyncHandler(async(req,res)=>{
-    const {fyi,amount,expenses,institution,user,contributors,description}=req.body;
+    const {fyi,amount,expenses,institution,user,revenues,description}=req.body;
 
     if (!fyi || !amount || !institution || !description) throw new Error("All fields are required");
     
@@ -17,6 +19,7 @@ const addBudget=asyncHandler(async(req,res)=>{
 
         const newBudget=await Budget.create({
             expenditures:expenses,
+            revenues:revenues,
             fyi:fyi,
             amount:amount,
             institution:institution,
@@ -101,13 +104,26 @@ const addReviewers=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
     const {reviewers}=req.body;
-    
+    const {email,fullNames}=req.user;
     try {
         const updateBudget=await Request.findByIdAndUpdate(id,{
             $push:{reviewers}
         },{
             new:true
         });
+
+        reviewers.forEach(async (reviewer) => {
+            const {user}=reviewer;
+            const newUser=await Users.findById(user);
+            if (newUser) {
+                await sendEmail({
+                    email: newUser.email,
+                    subject: "You have been added as a reviewer",
+                    message:email+"(" + fullNames +") has been added you as a reviewer to  budget request. \n \n Follow this link to approve or reject the request: \n" + "https://budgetplaningandexecution.netlify.app/budget/requests/"+updateBudget._id,
+                });
+            }            
+        });
+
         res.json(updateBudget);
     } catch (error) {
         throw new Error(error);
@@ -268,6 +284,36 @@ const approveBudget=asyncHandler(async(req,res)=>{
     }
 })
 
+const addExenpenseOrIncome=asyncHandler(async(req,res)=>{
+    const {id}=req.params;
+    validateMongodbId(id);
+    const {type,category}=req.body;
+    try {
+        if(!type || !category) throw new Error("All fields are required");
+
+        if(await categories.findOne({category})) throw new Error("Category already exists");
+        const newExpenseOrIncome=await categories.create({
+            category:category,
+            type:type,
+            institution:id
+        })
+
+        res.json(newExpenseOrIncome);
+    }catch (error) {
+        throw new Error(error)
+    }
+})
+
+const getAllCategories=asyncHandler(async(req,res)=>{
+    try{
+        const getCategories=await categories.find()
+        .populate("institution");
+        res.json(getCategories);
+    }catch(error){
+        throw new Error(error)
+    }
+})
+
 module.exports={
     addBudget,
     getAllBudgets,
@@ -283,5 +329,7 @@ module.exports={
     addComents,
     sendReview,
     modifyRequest,
-    approveBudget
+    approveBudget,
+    addExenpenseOrIncome,
+    getAllCategories
 }

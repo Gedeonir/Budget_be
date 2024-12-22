@@ -2,6 +2,7 @@ const Institution=require("../models/institutions");
 const asyncHandler = require("express-async-handler");
 const validateMongodbId = require("../utils/validateMongodbId");
 const sendEmail=require("../utils/sendEmail");
+const categories = require("../models/categories");
 
 const addInstitution=asyncHandler(async(req,res)=>{
     const {institutionName,email,mobile,acronym}=req.body;
@@ -97,10 +98,12 @@ const updateInstitution=asyncHandler(async(req,res)=>{
     }
 })
 
+
+
 module.exports={
     addInstitution,
     getOneInstitution,
     getAllInstitutions,
     deleteInstitution,
-    updateInstitution
+    updateInstitution,
 }

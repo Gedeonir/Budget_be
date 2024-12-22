@@ -10,7 +10,7 @@ let budgetModel=new mongoose.Schema({
     ],
     revenues:[
         {
-            Income:{type:String},
+            income:{type:String},
             amountToCollect:{type:String},
             percentage:{type:String},
         },
