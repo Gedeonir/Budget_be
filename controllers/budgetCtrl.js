@@ -11,7 +11,7 @@ const addBudget=asyncHandler(async(req,res)=>{
 
     if (!fyi || !amount || !institution || !description) throw new Error("All fields are required");
     
-    if(await Budget.findOne({fyi})){
+    if(await Budget.findOne({fyi,institution})){
         throw new Error("Budget already exists"); 
     }
 
@@ -24,7 +24,7 @@ const addBudget=asyncHandler(async(req,res)=>{
             amount:amount,
             institution:institution,
             description:description,
-            createdBy:user
+            createdBy:user,
         });
         res.json(newBudget);
         
@@ -291,7 +291,7 @@ const addExenpenseOrIncome=asyncHandler(async(req,res)=>{
     try {
         if(!type || !category) throw new Error("All fields are required");
 
-        if(await categories.findOne({category})) throw new Error("Category already exists");
+        if(await categories.findOne({category,institution:id})) throw new Error("Category already exists");
         const newExpenseOrIncome=await categories.create({
             category:category,
             type:type,
