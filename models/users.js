@@ -37,6 +37,7 @@ let userModel = new mongoose.Schema(
     },   
     profilePicture: {
       type: String,
+      default: "",
     },
     institution:{
       type: mongoose.Schema.Types.ObjectId, ref: "Institutions"

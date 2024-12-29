@@ -5,6 +5,7 @@ const{
     getOneUser,
     deleteUser,
     updateUser,
+    updatePicture
 }=require("../controllers/usersCtrl");
 
 const express=require("express");
@@ -18,6 +19,7 @@ userRoutes.get("/:id",authMiddleware,getOneUser);
 userRoutes.get("/",authMiddleware,getAllUsers);
 userRoutes.delete("/:id",authMiddleware,isAdmin,deleteUser);
 userRoutes.get("/one/about",authMiddleware,viewProfile);
-userRoutes.put("/:id",authMiddleware,isAdmin,updateUser);
+userRoutes.patch("/:id",authMiddleware,isAdmin,updateUser);
+userRoutes.patch("/upload_profile_picture/upload",authMiddleware,updatePicture);
 
 module.exports=userRoutes

@@ -4,6 +4,7 @@ const { generateToken } = require("../utils/jwtToken");
 const validateMongodbId = require("../utils/validateMongodbId");
 const Institution=require("../models/institutions");
 const sendEmail=require("../utils/sendEmail");
+const uploadImage = require("../utils/uploadImage");
 
 const viewProfile=asyncHandler(async(req,res)=>{
     const {id}=req.user;
@@ -14,6 +15,26 @@ const viewProfile=asyncHandler(async(req,res)=>{
         res.json({
             getProfile,
           });
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
+const updatePicture=asyncHandler(async(req,res)=>{
+    const {id}=req.user;
+    validateMongodbId(id);
+    const {picture}=req.body;
+    try {
+        if (!picture ) {
+            throw new Error('picture is required.');
+        }
+        const result = await uploadImage(picture, 'bpe/profile_pictures', `user_${id}`);
+        const updateProfile = await Users.findByIdAndUpdate(
+            id,
+            { profilePicture: result.url },
+            { new: true }
+        );
+        res.json(updateProfile);
     } catch (error) {
         throw new Error(error);
     }
@@ -100,7 +121,7 @@ const deleteUser=asyncHandler(async(req,res)=>{
 })
 
 const updateUser=asyncHandler(async(req,res)=>{
-    const{fullNames,email,mobile,password,position,role}=req.body;
+    const{fullNames,email,mobile,institution,position,role}=req.body;
 
     const {id}=req.params;
     validateMongodbId(id)
@@ -111,9 +132,8 @@ const updateUser=asyncHandler(async(req,res)=>{
             fullNames,
             email,
             mobile,
-            password,
             position,
-            role
+            institution,
         },
         {
             new: true,
@@ -136,5 +156,6 @@ module.exports={
     getOneUser,
     deleteUser,
     updateUser,
+    updatePicture
 }
 

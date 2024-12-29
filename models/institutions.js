@@ -21,8 +21,8 @@ let institutionsModel=new mongoose.Schema({
         // unique:true
     },
     profilePicture: {
-        type: Array,
-        default: [],
+        type: String,
+        default: "",
     },
 },
 {

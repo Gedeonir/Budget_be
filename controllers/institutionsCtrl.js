@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 const validateMongodbId = require("../utils/validateMongodbId");
 const sendEmail=require("../utils/sendEmail");
 const categories = require("../models/categories");
+const uploadImage = require("../utils/uploadImage");
 
 const addInstitution=asyncHandler(async(req,res)=>{
     const {institutionName,email,mobile,acronym}=req.body;
@@ -98,6 +99,26 @@ const updateInstitution=asyncHandler(async(req,res)=>{
     }
 })
 
+const updatePicture=asyncHandler(async(req,res)=>{
+    const {picture,institution}=req.body;
+    validateMongodbId(institution);
+
+    try {
+        if (!picture ) {
+            throw new Error('picture is required.');
+        }
+        const result = await uploadImage(picture, 'bpe/profile_pictures', `institution_${institution}`);
+        const updateProfile = await Institution.findByIdAndUpdate(
+            institution,
+            { profilePicture: result.url },
+            { new: true }
+        );
+        res.json(updateProfile);
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
 
 
 module.exports={
@@ -106,4 +127,5 @@ module.exports={
     getAllInstitutions,
     deleteInstitution,
     updateInstitution,
+    updatePicture
 }

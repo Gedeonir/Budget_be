@@ -14,7 +14,8 @@ const seedUser=async()=>{
         "institutionName":"Ministry of Finance and Economic Planning",
         "email":"info@minecofin.gov.rw",
         "mobile":"0100",
-        "acronym":"MINECOFIN"
+        "acronym":"MINECOFIN",
+        "profilePicture": ""
     }
 
     try {
