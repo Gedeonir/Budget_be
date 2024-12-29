@@ -73,7 +73,7 @@ const newUser=asyncHandler(async(req,res)=>{
         await sendEmail({
             email: newUser.email,
             subject: "Your password",
-            message:"Ijambo banga ryawe ni \n \n" + password,
+            message:"Your password is \n \n" + password,
         });
 
         res.json({newUser});

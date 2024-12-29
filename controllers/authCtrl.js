@@ -37,7 +37,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
         await sendEmail({
             email: user.email,
             subject: "Your password Reset OTP code (valid for 10 min )",
-            message:"Kode yo guhindura ijambo banga ryawe ni \n \n" + OTPCode +"\n Niba utasabye guhindura ijambo banga ryawe,irengangize iyi message.",
+            message:"Your password Reset OTP code is \n \n" + OTPCode +"\n if you did not request for password change,Ignore this email.",
         });
     
         res.json({
