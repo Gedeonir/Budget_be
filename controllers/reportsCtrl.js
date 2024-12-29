@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const Transactions = require('../models/transactions');
 const validateMongodbId = require('../utils/validateMongodbId');
+const ExcelJS = require('exceljs');
 
 const overviewReports = asyncHandler(async (req, res) => {
     try {
@@ -118,9 +119,11 @@ function wrapText(text, font, fontSize, maxWidth) {
 
 const transactionsReports = asyncHandler(async (req, res) => {
     try {
-        const { startDate, endDate, inst } = req.body;
-        validateMongodbId(inst);
-        const {fullNames, email, mobile,position,institution} = req.user;        
+        const { startDate, endDate, inst, docType } = req.body;
+
+
+        inst && validateMongodbId(inst);
+        const { fullNames, email, mobile, position, institution } = req.user;
 
         const query = {
             ...(startDate && endDate && { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } }),
@@ -128,136 +131,89 @@ const transactionsReports = asyncHandler(async (req, res) => {
         };
         // Fetch budget data
         const transactions = await Transactions.find(query)
-        .populate("budget")
-        .populate("institution")
-        .sort({ createdAt: 1 });
+            .populate("budget")
+            .populate("institution")
+            .sort({ createdAt: 1 });
 
         if (!transactions || transactions.length === 0) {
-            throw new Error("No budgets found for FYI 2024-25");
+            throw new Error("No transactions found!");
         }
-        const totalIncome = transactions.filter((budget) => budget.type.toLowerCase() === "income").reduce((sum, budget) =>sum + parseFloat(budget.amount || 0), 0);
-        const totalExpense = transactions.filter((budget) => budget.type.toLowerCase() === "expense").reduce((sum, budget) =>sum + parseFloat(budget.amount || 0), 0);
+        const totalIncome = transactions.filter((budget) => budget.type.toLowerCase() === "income").reduce((sum, budget) => sum + parseFloat(budget.amount || 0), 0);
+        const totalExpense = transactions.filter((budget) => budget.type.toLowerCase() === "expense").reduce((sum, budget) => sum + parseFloat(budget.amount || 0), 0);
+
+        if (docType?.toLowerCase() === 'pdf') {
 
 
-        // Create a new PDF document
-        const pdfDoc = await PDFDocument.create();
-        const pageHeight = 792; // Default page height (A4 size in points)
-        const pageWidth = 612; // Default page width (A4 size in points)
-        const lineHeight = 20; // Height for each record line
-        const margin = 20; // Page margin
+            // Create a new PDF document
+            const pdfDoc = await PDFDocument.create();
+            const pageHeight = 792; // Default page height (A4 size in points)
+            const pageWidth = 612; // Default page width (A4 size in points)
+            const lineHeight = 20; // Height for each record line
+            const margin = 20; // Page margin
 
-        let y = pageHeight - margin;
-        // Add a new page
-        let page = pdfDoc.addPage([pageWidth, pageHeight]); // P
-        const { width, height } = page.getSize();
+            let y = pageHeight - margin;
+            // Add a new page
+            let page = pdfDoc.addPage([pageWidth, pageHeight]); // P
+            const { width, height } = page.getSize();
 
-        const imagePath = path.join(__dirname, '../public/Govt.png');
+            const imagePath = path.join(__dirname, '../public/Govt.png');
 
-        const imageBytes = fs.readFileSync(imagePath);
-        const image = await pdfDoc.embedPng(imageBytes);
-
-
-        const { width: imageWidth, height: imageHeight } = image.scale(0.2); // Scale image as needed
-
-        // Calculate centered position
-        const x = (pageWidth - imageWidth) / 2;
-
-        // Draw the image at the calculated position
-        page.drawImage(image, { x, y: y - 30, width: imageWidth, height: imageHeight });
-
-        // Add content to the PDF
-        const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-        const text = transactions[0].institution?.institutionName || "N/A";
-        const fontSize = 16;
-
-        // Measure text width
-        const textWidth = font.widthOfTextAtSize(text, fontSize);
-
-        // Draw centered text
-        page.drawText(text, {
-            x: (width - textWidth) / 2,
-            y: y - 40,
-            size: fontSize,
-            font,
-        });
-
-        page.drawLine({
-            start: { x: 0, y: y - 50 },
-            end: { x: width, y: y - 50 },
-            thickness: 1, // Optional: Line width
-            // color: rgb(red, green, blue), // Optional: Line color
-            opacity: 1, // Optional: Transparency (0 to 1)
-        });
-
-        const title =startDate && endDate ? "Transaction history from " + startDate + " to " + endDate: "Transaction history";
-        const titleWidth = font.widthOfTextAtSize(title, fontSize);
-
-        page.drawText(title, {
-            x: (width - titleWidth) / 2,
-            y: y - 70,
-            size: fontSize,
-            font: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
-        });
-
-        for (let i = 0; i < transactions.length; i++) {
-            const budget = transactions[i];
-
-            // Draw table headers if it's the first page or a new page
-            if (i === 0 || y < margin + 3 * lineHeight) {
-                // Add a new page if not the first iteration
-                if (i !== 0) {
-                    page = pdfDoc.addPage([pageWidth, pageHeight]);
-                    y = pageHeight - margin;
-                }
-
-                // Draw table headers
-                page.drawText("Transaction", { x: margin, y: y - 90, size: 12, font });
-                page.drawText("Institution", { x: margin + 200, y: y - 90, size: 12, font });
-                page.drawText("FYI", { x: margin + 300, y: y - 90, size: 12, font });
-                page.drawText("Type", { x: margin + 350, y: y - 90, size: 12, font });
-                page.drawText("Amount", { x: margin + 400, y: y - 90, size: 12, font });
-                page.drawText("Date", { x: margin + 480, y: y - 90, size: 12, font });
-
-                page.drawLine({
-                    start: { x: margin, y: y - 95 },
-                    end: { x: pageWidth - margin, y: y - 95 },
-                    thickness: 0.1,
-                });
-
-                y -= lineHeight; // Adjust `y` for the next row
-            }
+            const imageBytes = fs.readFileSync(imagePath);
+            const image = await pdfDoc.embedPng(imageBytes);
 
 
-            const categoryLines = wrapText(budget?.category || "N/A", font, 10, 200);
-            const institutionLines = wrapText(budget?.institution?.institutionName || "N/A", font, fontSize, 150);
-            const fyiLines = wrapText(budget?.budget?.fyi || "N/A", font, 10, 100);
-            const amountLines = wrapText(budget?.amount || "N/A", font, 10, 100);
-            const typeLines = wrapText(budget?.type || "N/A", font, 10, 200);
-            const dateLines = wrapText(`${new Date(budget?.createdAt).toLocaleDateString()}` || "N/A", font, 10, 100);
-            // Calculate the number of lines required for this row
-            const maxLines = Math.max(dateLines.length, typeLines.length, categoryLines.length, institutionLines.length, fyiLines.length, amountLines.length);
+            const { width: imageWidth, height: imageHeight } = image.scale(0.2); // Scale image as needed
 
-            for (let j = 0; j < maxLines; j++) {
-                const institutionText = institutionLines[j] || "";
-                const fyiText = fyiLines[j] || "";
-                const amountText = amountLines[j] || "";
-                const categoryText = categoryLines[j] || "";
-                const typeText = typeLines[j] || "";
-                const dateText = dateLines[j] || "";
-                // Draw the wrapped text for each cell
-                page.drawText(categoryText, { x: margin, y: y - 90, size: 10, font });
-                page.drawText(institutionText, { x: margin + 200, y: y - 90, size: 10, font });
-                page.drawText(fyiText, { x: margin + 300, y: y - 90, size: 10, font });
-                page.drawText(typeText, { x: margin + 350, y: y - 90, size: 10, font });
-                page.drawText(typeText.toLowerCase() === "expense" ? "-" + amountText : "+" + amountText, { x: margin + 400, y: y - 90, size: 10, font, color: typeText.toLowerCase() === "expense" ? rgb(220 / 255, 38 / 255, 38 / 255) : rgb(18 / 255, 163 / 255, 71 / 255) });
-                page.drawText(`${dateText}` || "N/A", { x: margin + 480, y: y - 90, size: 10, font });
+            // Calculate centered position
+            const x = (pageWidth - imageWidth) / 2;
 
-                y -= lineHeight; // Move to the next line
+            // Draw the image at the calculated position
+            page.drawImage(image, { x, y: y - 30, width: imageWidth, height: imageHeight });
 
-                // Check if we need a new page
-                if (y < (margin + lineHeight) * 2) {
-                    page = pdfDoc.addPage([pageWidth, pageHeight]);
-                    y = (pageHeight - margin) + 80;
+            // Add content to the PDF
+            const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+            const text = transactions[0].institution?.institutionName || "N/A";
+            const fontSize = 16;
+
+            // Measure text width
+            const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+            // Draw centered text
+            page.drawText(text, {
+                x: (width - textWidth) / 2,
+                y: y - 40,
+                size: fontSize,
+                font,
+            });
+
+            page.drawLine({
+                start: { x: 0, y: y - 50 },
+                end: { x: width, y: y - 50 },
+                thickness: 1, // Optional: Line width
+                // color: rgb(red, green, blue), // Optional: Line color
+                opacity: 1, // Optional: Transparency (0 to 1)
+            });
+
+            const title = startDate && endDate ? "Transaction history from " + startDate + " to " + endDate : "Transaction history";
+            const titleWidth = font.widthOfTextAtSize(title, fontSize);
+
+            page.drawText(title, {
+                x: (width - titleWidth) / 2,
+                y: y - 70,
+                size: fontSize,
+                font: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
+            });
+
+            for (let i = 0; i < transactions.length; i++) {
+                const budget = transactions[i];
+
+                // Draw table headers if it's the first page or a new page
+                if (i === 0 || y < margin + 3 * lineHeight) {
+                    // Add a new page if not the first iteration
+                    if (i !== 0) {
+                        page = pdfDoc.addPage([pageWidth, pageHeight]);
+                        y = pageHeight - margin;
+                    }
 
                     // Draw table headers
                     page.drawText("Transaction", { x: margin, y: y - 90, size: 12, font });
@@ -272,31 +228,128 @@ const transactionsReports = asyncHandler(async (req, res) => {
                         end: { x: pageWidth - margin, y: y - 95 },
                         thickness: 0.1,
                     });
-                    y -= lineHeight; // Adjust `y` for rows
+
+                    y -= lineHeight; // Adjust `y` for the next row
+                }
+
+
+                const categoryLines = wrapText(budget?.category || "N/A", font, 10, 200);
+                const institutionLines = wrapText(budget?.institution?.institutionName || "N/A", font, fontSize, 150);
+                const fyiLines = wrapText(budget?.budget?.fyi || "N/A", font, 10, 100);
+                const amountLines = wrapText(budget?.amount || "N/A", font, 10, 100);
+                const typeLines = wrapText(budget?.type || "N/A", font, 10, 200);
+                const dateLines = wrapText(`${new Date(budget?.createdAt).toLocaleDateString()}` || "N/A", font, 10, 100);
+                // Calculate the number of lines required for this row
+                const maxLines = Math.max(dateLines.length, typeLines.length, categoryLines.length, institutionLines.length, fyiLines.length, amountLines.length);
+
+                for (let j = 0; j < maxLines; j++) {
+                    const institutionText = institutionLines[j] || "";
+                    const fyiText = fyiLines[j] || "";
+                    const amountText = amountLines[j] || "";
+                    const categoryText = categoryLines[j] || "";
+                    const typeText = typeLines[j] || "";
+                    const dateText = dateLines[j] || "";
+                    // Draw the wrapped text for each cell
+                    page.drawText(categoryText, { x: margin, y: y - 90, size: 10, font });
+                    page.drawText(institutionText, { x: margin + 200, y: y - 90, size: 10, font });
+                    page.drawText(fyiText, { x: margin + 300, y: y - 90, size: 10, font });
+                    page.drawText(typeText, { x: margin + 350, y: y - 90, size: 10, font });
+                    page.drawText(typeText.toLowerCase() === "expense" ? "-" + amountText : "+" + amountText, { x: margin + 400, y: y - 90, size: 10, font, color: typeText.toLowerCase() === "expense" ? rgb(220 / 255, 38 / 255, 38 / 255) : rgb(18 / 255, 163 / 255, 71 / 255) });
+                    page.drawText(`${dateText}` || "N/A", { x: margin + 480, y: y - 90, size: 10, font });
+
+                    y -= lineHeight; // Move to the next line
+
+                    // Check if we need a new page
+                    if (y < (margin + lineHeight) * 2) {
+                        page = pdfDoc.addPage([pageWidth, pageHeight]);
+                        y = (pageHeight - margin) + 80;
+
+                        // Draw table headers
+                        page.drawText("Transaction", { x: margin, y: y - 90, size: 12, font });
+                        page.drawText("Institution", { x: margin + 200, y: y - 90, size: 12, font });
+                        page.drawText("FYI", { x: margin + 300, y: y - 90, size: 12, font });
+                        page.drawText("Type", { x: margin + 350, y: y - 90, size: 12, font });
+                        page.drawText("Amount", { x: margin + 400, y: y - 90, size: 12, font });
+                        page.drawText("Date", { x: margin + 480, y: y - 90, size: 12, font });
+
+                        page.drawLine({
+                            start: { x: margin, y: y - 95 },
+                            end: { x: pageWidth - margin, y: y - 95 },
+                            thickness: 0.1,
+                        });
+                        y -= lineHeight; // Adjust `y` for rows
+                    }
                 }
             }
+
+            page.drawText("Total incomes= " + totalIncome.toFixed(2) + " Frw", { x: margin, y: y - 100, size: 16, font });
+            page.drawText("Total expenses= " + totalExpense.toFixed(2) + " Frw", { x: margin + 300, y: y - 100, size: 16, font });
+
+            page.drawText("Generated by:", { x: margin, y: y - 120, size: 16, font });
+            page.drawText(fullNames || "N/A", { x: margin, y: y - 140, size: 10, font });
+            page.drawText(email || "N/A", { x: margin, y: y - 160, size: 10, font });
+            page.drawText(mobile || "N/A", { x: margin, y: y - 180, size: 10, font });
+            page.drawText(position || "N/A", { x: margin, y: y - 200, size: 10, font });
+            page.drawText(`${new Date()}`, { x: margin, y: y - 220, size: 10, font });
+
+
+
+            // Save the PDF
+            const pdfBytes = await pdfDoc.save();
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename="transactions_history.pdf"');
+            res.end(pdfBytes);
+        } else {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("Transactions Report");
+
+            // Add headers
+            worksheet.columns = [
+                { header: "Transaction", key: "category", width: 20 },
+                { header: "Institution", key: "institution", width: 25 },
+                { header: "FYI", key: "fyi", width: 10 },
+                { header: "Type", key: "type", width: 15 },
+                { header: "Amount", key: "amount", width: 15 },
+                { header: "Date", key: "createdAt", width: 20 },
+            ];
+
+            // Add data rows
+            transactions.forEach((budget) => {
+                worksheet.addRow({
+                    category: budget.category || "N/A",
+                    institution: budget.institution?.institutionName || "N/A",
+                    fyi: budget.budget?.fyi || "N/A",
+                    type: budget.type || "N/A",
+                    amount: budget.type.toLowerCase() === "expense" ? `-${budget.amount}` : `+${budget.amount}`,
+                    createdAt: new Date(budget.createdAt).toLocaleDateString(),
+                });
+            });
+
+            // Add totals at the end
+            worksheet.addRow({}); // Empty row for spacing
+            worksheet.addRow({ category: "Total Income:", amount: totalIncome.toFixed(2) });
+            worksheet.addRow({ category: "Total Expense:", amount: totalExpense.toFixed(2) });
+
+            // Add generated by info
+            worksheet.addRow({}); // Empty row for spacing
+            worksheet.addRow({ category: "Generated By:" });
+            worksheet.addRow({ category: "Name:", institution: fullNames || "N/A" });
+            worksheet.addRow({ category: "Email:", institution: email || "N/A" });
+            worksheet.addRow({ category: "Mobile:", institution: mobile || "N/A" });
+            worksheet.addRow({ category: "Position:", institution: position || "N/A" });
+            worksheet.addRow({ category: "Date:", institution: new Date().toLocaleString() });
+
+            // Set response headers and send the Excel file
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename="transactions_history.xlsx"');
+
+            await workbook.xlsx.write(res);
+            res.end();
+
         }
-
-        page.drawText("Total incomes= " + totalIncome.toFixed(2) + " Frw", { x: margin, y: y - 100, size: 16, font });
-        page.drawText("Total expenses= " + totalExpense.toFixed(2) + " Frw", { x: margin+300, y: y - 100, size: 16, font });
-
-        page.drawText("Generated by:", { x: margin, y: y - 120, size: 16, font });
-        page.drawText(fullNames ||"N/A", { x: margin, y: y - 140, size: 10, font });
-        page.drawText(email ||"N/A", { x: margin, y: y - 160, size: 10, font });
-        page.drawText(mobile ||"N/A", { x: margin, y: y - 180, size: 10, font });
-        page.drawText(position ||"N/A", { x: margin, y: y - 200, size: 10, font });
-        page.drawText(`${new Date()}`, { x: margin, y: y - 220, size: 10, font });
-
-
-
-        // Save the PDF
-        const pdfBytes = await pdfDoc.save();
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename="transactions_history.pdf"');
-        res.end(pdfBytes);
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error generating PDF');
+        res.status(500).send('Error generating report');
     }
 }
 )

@@ -171,6 +171,7 @@ const createRequest=asyncHandler(async(req,res)=>{
             description,
             requestedBy:req?.user?._id
         });
+        
 
         res.json(newRequest);
     } catch (error) {
@@ -278,6 +279,7 @@ const approveBudget=asyncHandler(async(req,res)=>{
         },{
             new:true
         });
+
         res.json(updateBudget);
     } catch (error) {
         throw new Error(error);
