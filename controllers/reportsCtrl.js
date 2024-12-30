@@ -6,6 +6,7 @@ const path = require('path');
 const Transactions = require('../models/transactions');
 const validateMongodbId = require('../utils/validateMongodbId');
 const ExcelJS = require('exceljs');
+const regression = require('regression');
 
 const overviewReports = asyncHandler(async (req, res) => {
     try {
@@ -354,8 +355,93 @@ const transactionsReports = asyncHandler(async (req, res) => {
 }
 )
 
+const forecast = asyncHandler(async (req, res) => {
+    try {
+        const { predictYears = 6 } = req.query;
+
+        // Fetch transactions with their corresponding budget data
+        const transactions = await Transactions.find().populate("budget");
+
+        if (transactions.length < 1) {
+            return res.status(400).json({
+                error: "Insufficient data. Please provide transactions with associated budgets.",
+            });
+        }
+
+        // Group transactions by FYI from budget
+        const groupedData = {};
+        transactions.forEach((transaction) => {
+            const budget = transaction.budget;
+            if (!budget || !budget.fyi) return; // Skip if no budget or FYI
+
+            const fyi = budget.fyi;
+
+            // Initialize FYI if not already present
+            if (!groupedData[fyi]) {
+                groupedData[fyi] = { expenses: 0, incomes: 0 };
+            }            
+
+            // Sum up expenses and incomes
+            if (transaction.type.toLowerCase() === "expense") {
+                groupedData[fyi].expenses += parseFloat(transaction.amount);
+            } else if (transaction.type.toLowerCase() === "income") {
+                groupedData[fyi].incomes += parseFloat(transaction.amount)  ;
+            }
+        });
+
+        // Prepare historical data
+        const sortedFYIs = Object.keys(groupedData).sort(); // Sort FYIs for chronological order
+        const historicalData = sortedFYIs.map((fyi, index) => ({
+            fyi,
+            index,
+            ...groupedData[fyi],
+        }));
+
+        // Apply linear regression on expenses
+        const regressionData = historicalData.map((data) => [data.index, data.expenses]);
+        const result = regression.linear(regressionData);
+        const { equation } = result;
+
+        // Apply linear regression on Incomes
+        const regressionData2 = historicalData.map((data) => [data.index, data.incomes]);
+        const result2 = regression.linear(regressionData2);
+        const { equation: equation2 } = result2;
+
+
+
+        // Predict next financial years
+        const lastFYI = sortedFYIs[sortedFYIs.length - 1];
+        const [lastStartYear] = lastFYI.split('-').map(Number);
+        const predictions = [];
+        for (let i = 1; i <= predictYears; i++) {
+            const x = historicalData.length + i - 1; // Extend index for regression
+            const predictedExpense = equation[0] * x + equation[1];
+            const predictedIncome = equation2[0] * x + equation2[1];
+
+            const nextStartYear = lastStartYear + i;
+            const nextEndYear = nextStartYear + 1;
+            predictions.push({
+                fyi: `${nextStartYear}-${nextEndYear.toString().slice(-2)}`, // Format: "2026-27"
+                predictedExpense,
+                predictedIncome
+            });
+        }
+
+        // Respond with historical and forecasted data
+        res.status(200).json({
+            historical: historicalData,
+            forecast: predictions,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to generate forecast" });
+    }
+});
+
+
+
 
 
 module.exports = {
-    overviewReports, transactionsReports
+    overviewReports, transactionsReports, forecast
 }

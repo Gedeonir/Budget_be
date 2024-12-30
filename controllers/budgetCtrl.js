@@ -5,6 +5,8 @@ const sendEmail=require("../utils/sendEmail");
 const Request=require('../models/budgetRequests');
 const Users=require('../models/users');
 const categories = require('../models/categories');
+const Transactions=require('../models/transactions')
+
 
 const addBudget=asyncHandler(async(req,res)=>{
     const {fyi,amount,expenses,institution,user,revenues,description}=req.body;
@@ -273,6 +275,8 @@ const approveBudget=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
     const {status}=req.body;
+    console.log(status);
+    
     try {
         const updateBudget=await Budget.findByIdAndUpdate(id,{
             status
@@ -316,6 +320,7 @@ const getAllCategories=asyncHandler(async(req,res)=>{
     }
 })
 
+
 module.exports={
     addBudget,
     getAllBudgets,
@@ -333,5 +338,5 @@ module.exports={
     modifyRequest,
     approveBudget,
     addExenpenseOrIncome,
-    getAllCategories
+    getAllCategories,
 }

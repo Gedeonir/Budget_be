@@ -15,7 +15,7 @@ const {
   modifyRequest,
   approveBudget,
   getAllCategories,
-  addExenpenseOrIncome
+  addExenpenseOrIncome,
 } = require("../controllers/budgetCtrl");
 
 
@@ -23,7 +23,7 @@ const express = require("express");
 
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 const { getAllTransactions, addTransaction } = require("../controllers/transactionsCtrl");
-const { overviewReports, transactionsReports } = require("../controllers/reportsCtrl");
+const { overviewReports, transactionsReports,forecast} = require("../controllers/reportsCtrl");
 
 const budgetRoutes = express.Router();
 
@@ -41,7 +41,7 @@ budgetRoutes.get("/request/:id", authMiddleware, getOneRequest);
 budgetRoutes.patch("/request/comment/:id", authMiddleware, addComents);
 budgetRoutes.patch("/request/:requestId/review", authMiddleware, sendReview);
 budgetRoutes.patch("/request/:requestId/modify", authMiddleware, modifyRequest);
-budgetRoutes.patch("/:id/approve", authMiddleware, isAdmin, approveBudget);
+budgetRoutes.patch("/:id/approve", authMiddleware, approveBudget);
 
 budgetRoutes.get("/transactions/all", authMiddleware, getAllTransactions);
 budgetRoutes.post("/transaction/new", authMiddleware, addTransaction);
@@ -51,6 +51,10 @@ budgetRoutes.get("/categories/all", authMiddleware, getAllCategories);
 
 
 budgetRoutes.post('/reports/budget/pdf', authMiddleware,transactionsReports);
+
+
+budgetRoutes.get('/forecast',forecast);
+
 
 
 module.exports = budgetRoutes;
