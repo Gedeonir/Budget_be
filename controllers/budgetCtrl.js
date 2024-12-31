@@ -166,16 +166,27 @@ const removeReviewers=asyncHandler(async(req,res)=>{
 })
 
 const createRequest=asyncHandler(async(req,res)=>{
-    const {budget,description}=req.body;
+    const {budget,description,to}=req.body;
     try {
         const newRequest=await Request.create({
             budget,
             description,
             requestedBy:req?.user?._id
         });
+
+        const findUser=await Users.find({institution:to,position:'Budget officer'})
+        if(findUser && findUser.length >0){
+            findUser.forEach(async(item)=>{
+                await sendEmail({
+                    email: item.email,
+                    subject: "Budget approval Request",
+                    message:req?.user?.email+"(" + req?.user?.fullNames +") from "+ req?.user?.institution?.institutionName+ " has requested for budget approval. \n \n Follow this link to approve or reject the request: \n" + "https://budgetplaningandexecution.netlify.app/dashboard/budget/requests/"+budget,
+                })
+            })
+        }
         
 
-        res.json(newRequest);
+        res.json("newRequest");
     } catch (error) {
         throw new Error(error);
     }
@@ -274,8 +285,7 @@ const modifyRequest=asyncHandler(async(req,res)=>{
 const approveBudget=asyncHandler(async(req,res)=>{
     const {id}=req.params;
     validateMongodbId(id);
-    const {status}=req.body;
-    console.log(status);
+    const {status}=req.body;    
     
     try {
         const updateBudget=await Budget.findByIdAndUpdate(id,{
@@ -283,6 +293,19 @@ const approveBudget=asyncHandler(async(req,res)=>{
         },{
             new:true
         });
+        if(!updateBudget) throw new Error("Budget not found");
+
+        const findUser=await Users.find({institution:updateBudget.institution,position:'Budget officer'})
+
+        if(findUser && findUser.length >0){
+            findUser.forEach(async(item)=>{
+                await sendEmail({
+                    email: item.email,
+                    subject: "Budget approval Response",
+                    message:req?.user?.email+"(" + req?.user?.fullNames +") from "+ req?.user?.institution?.institutionName+ " has " +status+ " your budget request. \n \n Follow this link to view the request: \n" + "https://budgetplaningandexecution.netlify.app/budget/requests/"+updateBudget._id ,
+                })
+            })
+        }
 
         res.json(updateBudget);
     } catch (error) {
