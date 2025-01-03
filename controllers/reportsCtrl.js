@@ -120,27 +120,15 @@ function wrapText(text, font, fontSize, maxWidth) {
 
 const transactionsReports = asyncHandler(async (req, res) => {
     try {
-        const { startDate, endDate, inst, docType } = req.body;
+        const { docType,data,startDate,endDate } = req.body;
 
-
-        inst && validateMongodbId(inst);
         const { fullNames, email, mobile, position, institution } = req.user;
 
-        const query = {
-            ...(startDate && endDate && { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } }),
-            ...(inst && { institution: inst }),
-        };
-        // Fetch budget data
-        const transactions = await Transactions.find(query)
-            .populate("budget")
-            .populate("institution")
-            .sort({ createdAt: 1 });
-
-        if (!transactions || transactions.length === 0) {
+        if (!data || data.length === 0) {
             throw new Error("No transactions found!");
         }
-        const totalIncome = transactions.filter((budget) => budget.type.toLowerCase() === "income").reduce((sum, budget) => sum + parseFloat(budget.amount || 0), 0);
-        const totalExpense = transactions.filter((budget) => budget.type.toLowerCase() === "expense").reduce((sum, budget) => sum + parseFloat(budget.amount || 0), 0);
+        const totalIncome = data.filter((budget) => budget.type.toLowerCase() === "income").reduce((sum, budget) => sum + parseFloat(budget.amount || 0), 0);
+        const totalExpense = data.filter((budget) => budget.type.toLowerCase() === "expense").reduce((sum, budget) => sum + parseFloat(budget.amount || 0), 0);
 
         if (docType?.toLowerCase() === 'pdf') {
 
@@ -173,7 +161,7 @@ const transactionsReports = asyncHandler(async (req, res) => {
 
             // Add content to the PDF
             const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-            const text = transactions[0].institution?.institutionName || "N/A";
+            const text = data[0].institution?.institutionName || "N/A";
             const fontSize = 16;
 
             // Measure text width
@@ -205,8 +193,8 @@ const transactionsReports = asyncHandler(async (req, res) => {
                 font: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
             });
 
-            for (let i = 0; i < transactions.length; i++) {
-                const budget = transactions[i];
+            for (let i = 0; i < data.length; i++) {
+                const budget = data[i];
 
                 // Draw table headers if it's the first page or a new page
                 if (i === 0 || y < margin + 3 * lineHeight) {
@@ -315,7 +303,7 @@ const transactionsReports = asyncHandler(async (req, res) => {
             ];
 
             // Add data rows
-            transactions.forEach((budget) => {
+            data.forEach((budget) => {
                 worksheet.addRow({
                     category: budget.category || "N/A",
                     institution: budget.institution?.institutionName || "N/A",

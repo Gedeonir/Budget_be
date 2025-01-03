@@ -13,7 +13,7 @@ const sendEmail = async (options) => {
   });
 
   const emailOptions = {
-    from: `BPE < ${process.env.EMAIL_USERNAME}>`,
+    from: `BPI < ${process.env.EMAIL_USERNAME}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,
