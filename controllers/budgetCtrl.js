@@ -174,7 +174,7 @@ const createRequest=asyncHandler(async(req,res)=>{
             requestedBy:req?.user?._id
         });
 
-        const findUser=await Users.find({institution:to,position:'Budget officer'})
+        const findUser=await Users.find({institution:to,position:'Budget Officer'})
         if(findUser && findUser.length >0){
             findUser.forEach(async(item)=>{
                 await sendEmail({
@@ -184,9 +184,11 @@ const createRequest=asyncHandler(async(req,res)=>{
                 })
             })
         }
+
+        
         
 
-        res.json("newRequest");
+        res.json(newRequest);
     } catch (error) {
         throw new Error(error);
     }
@@ -295,7 +297,7 @@ const approveBudget=asyncHandler(async(req,res)=>{
         });
         if(!updateBudget) throw new Error("Budget not found");
 
-        const findUser=await Users.find({institution:updateBudget.institution,position:'Budget officer'})
+        const findUser=await Users.find({institution:updateBudget.institution,position:'Budget Officer'})
 
         if(findUser && findUser.length >0){
             findUser.forEach(async(item)=>{
