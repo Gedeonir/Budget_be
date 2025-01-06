@@ -36,6 +36,7 @@ const addBudget=asyncHandler(async(req,res)=>{
 
 })
 
+
 const getAllBudgets=asyncHandler(async (req,res)=>{
     try {
         const allBudgets=await Budget.find({})

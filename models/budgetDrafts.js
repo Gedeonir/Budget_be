@@ -1,40 +1,44 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
 
-let budgetDraftsModel=new mongoose.Schema({
-    income:[
+let budgetDraftsModel = new mongoose.Schema({
+    expenditures: [
         {
-            incomeSource:{type:String},
-            amountExpected:{type:String},
-            percentage:{type:String}
+            expense: { type: String },
+            amountToSpent: { type: String },
+            percentage: { type: String },
         },
     ],
-    expenditures:[
+    revenues: [
         {
-            expense:{type:String},
-            amountToSpent:{type:String},
-            percentage:{type:String}
+            income: { type: String },
+            amountToCollect: { type: String },
+            percentage: { type: String },
         },
     ],
-    FYI:{
-        type:String,
-        unique:true,
-        required:true
+    fyi: { type: String },
+    status: {
+        type: String,
+        default: "pending"
     },
-    status:{
-        type:String,
-        default:"Under review"
-    },
-    reviwers:[{user:{type: mongoose.Schema.Types.ObjectId, ref: "Users"},message:{type:String},comment:{type:String}}],
-    verifiedAndConfirmedBy:{
+    contributors: [{ user: { type: mongoose.Schema.Types.ObjectId, ref: "Users" } }],
+    verifiedAndConfirmedBy: {
         type: mongoose.Schema.Types.ObjectId, ref: "Users"
     },
-    institution:{
+    institution: {
         type: mongoose.Schema.Types.ObjectId, ref: "Institutions"
-    }
+    },
+    amount: {
+        type: String
+    },
+    description: {
+        type: String
+    },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
+
 },
-{
-    timestamps: true,
-}
+    {
+        timestamps: true,
+    }
 )
 
 module.exports = mongoose.model("budgetDrafts", budgetDraftsModel);
