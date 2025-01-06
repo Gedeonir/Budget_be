@@ -36,6 +36,22 @@ const addBudget=asyncHandler(async(req,res)=>{
 
 })
 
+const addRevenue=asyncHandler(async(req,res)=>{
+    const {id}=req.params;
+    validateMongodbId(id);
+    const {revenues}=req.body;
+    try {
+        const updateBudget=await Budget.findByIdAndUpdate(id,{
+            $set:{revenues}
+        },{
+            new:true
+        });
+        res.json(updateBudget);
+    } catch (error) {
+        throw new Error(error);
+    }
+})
+
 
 const getAllBudgets=asyncHandler(async (req,res)=>{
     try {
@@ -365,4 +381,5 @@ module.exports={
     approveBudget,
     addExenpenseOrIncome,
     getAllCategories,
+    addRevenue
 }

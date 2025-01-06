@@ -16,6 +16,7 @@ const {
   approveBudget,
   getAllCategories,
   addExenpenseOrIncome,
+  addRevenue
 } = require("../controllers/budgetCtrl");
 
 
@@ -51,6 +52,8 @@ budgetRoutes.get("/categories/all", authMiddleware, getAllCategories);
 
 
 budgetRoutes.post('/reports/budget/pdf', authMiddleware,transactionsReports);
+
+budgetRoutes.patch('/one/:id/addIncome',addRevenue);
 
 
 budgetRoutes.get('/forecast',forecast);
