@@ -11,13 +11,14 @@ const addTransaction=asyncHandler(async(req,res)=>{
         amount,
         institution,
         budget,
-        category
+        category,
+        dateTransactionsTookPlace
         }=req.body;
 
         validateMongodbId(budget);
         validateMongodbId(institution);
 
-        if(!type || !transactionDescription || !amount || !institution || !budget || !category){
+        if(!type ||!dateTransactionsTookPlace || !transactionDescription || !amount || !institution || !budget || !category){
             throw new Error("All fields are required")
         }
 
@@ -30,9 +31,9 @@ const addTransaction=asyncHandler(async(req,res)=>{
             throw new Error("Institution not found");
         }
 
-        // if (budgetExist.status !== "approved") {
-        //     throw new Error("Budget is not approved yet!");
-        // }
+        //if (budgetExist.status !== "approved") {
+         //   throw new Error("Budget is not approved yet!");
+       // }
 
         const newTransaction=await Transaction.create({
             type,
@@ -40,6 +41,7 @@ const addTransaction=asyncHandler(async(req,res)=>{
             amount,
             institution,
             budget,
+            dateTransactionsTookPlace:dateTransactionsTookPlace,
             Slips:"slip",
             recordedBy:req?.user?._id,
             category

@@ -20,6 +20,10 @@ let transactionsModel=new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, ref: "Budgets",
         required:true
     },
+    dateTransactionsTookPlace:{
+        type:String,
+        required:true
+    },
     Slips:{
         type:String,
         required:true
