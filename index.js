@@ -20,11 +20,12 @@ app.use("/api/welcome", async(req,res)=>{
 });
 
 app.post("/api/sendEmail",async(req,res)=>{
-  const {ticket}=req.body;
+  const ticket=req.body;
+
   await sendEmail({
     email: ticket.email,
     subject: "Your Ticket ID",
-    message:"Your complaint on"+formData.title+" has been successfully submitted. Your ticket ID is "+ticket.id,
+    message:"Your complaint on "+ ticket.title +" has been successfully submitted. You can track your complaint by ticket ID "+ticket.id,
 });
   
 })
