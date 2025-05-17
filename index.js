@@ -27,7 +27,20 @@ app.post("/api/sendEmail",async(req,res)=>{
     subject: "Your Ticket ID",
     message:"Your complaint on "+ ticket.title +" has been successfully submitted. You can track your complaint by ticket ID "+ticket.id,
 });
+
+
   
+})
+
+app.post("/api/status/sendEmail",async(req,res)=>{
+  const ticket=req.body;
+
+  await sendEmail({
+    email: ticket.email,
+    subject: "Your Ticket status changed",
+    message:"Your complaint on "+ ticket.title +" is currently "+ticket.status+". You can track your complaint by ticket ID "+ticket.id +". Thank you for using our services.",
+});
+
 })
 
 app.listen(PORT, () => {
